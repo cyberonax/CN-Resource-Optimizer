@@ -109,13 +109,13 @@ if st.sidebar.button("Calculate"):
         output = BytesIO()
         writer = pd.ExcelWriter(output, engine='xlsxwriter')
         df.to_excel(writer, index=False, sheet_name="Results")
-        writer.save()
+        writer.close()  # Use writer.close() for newer versions of Pandas
         processed_data = output.getvalue()
         return processed_data
     
     excel_data = to_excel(df_results)
     st.download_button(
-        label="Download full results as Excel",
+        label="Download Results",
         data=excel_data,
         file_name="CyberNations_Optimal_Resource_Combinations.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
