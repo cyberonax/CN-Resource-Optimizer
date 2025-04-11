@@ -115,7 +115,7 @@ def set_war_mode():
     st.session_state.tech_cost_reduction = 2.0  # Greater focus on reducing tech cost
 
 # --- Streamlit UI ---
-st.title("Cyber Nations Optimal Resource Combination Finder")
+st.title("Cyber Nations | Optimal Resource Combination Finder")
 st.markdown("""
 Adjust the metric weights below and click **Calculate** to see optimal 12-resource combinations along with their triggered bonus resources.
 Bonus effects are integrated into the overall score.
