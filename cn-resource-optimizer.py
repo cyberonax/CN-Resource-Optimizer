@@ -89,7 +89,7 @@ Bonus effects—including technology cost reduction—are integrated into the ov
 # Sidebar input, including tech cost reduction slider
 weights = {
     "population_bonus": st.sidebar.number_input("Population Bonus Weight", value=2.0, step=0.1),
-    "land_bonus": st.sidebar.number_input("Land Bonus Weight", value2.0, step=0.1),
+    "land_bonus": st.sidebar.number_input("Land Bonus Weight", value=2.0, step=0.1),
     "infra_cost_reduction": st.sidebar.number_input("Infra Cost Reduction Weight", value=1.0, step=0.1),
     "soldier_efficiency": st.sidebar.number_input("Soldier Efficiency Weight", value=1.0, step=0.1),
     "income_bonus": st.sidebar.number_input("Income Bonus Weight", value=1.5, step=0.1),
