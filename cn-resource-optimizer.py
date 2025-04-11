@@ -79,6 +79,41 @@ def compute_combinations(weights):
     df["combo"] = df["combo"].apply(lambda x: ", ".join(x))
     return df.sort_values(by="score", ascending=False)
 
+# --- Initialize Session State for weight parameters ---
+if 'population_bonus' not in st.session_state:
+    st.session_state.population_bonus = 2.0
+if 'land_bonus' not in st.session_state:
+    st.session_state.land_bonus = 2.0
+if 'infra_cost_reduction' not in st.session_state:
+    st.session_state.infra_cost_reduction = 1.0
+if 'soldier_efficiency' not in st.session_state:
+    st.session_state.soldier_efficiency = 1.0
+if 'income_bonus' not in st.session_state:
+    st.session_state.income_bonus = 1.5
+if 'happiness' not in st.session_state:
+    st.session_state.happiness = 1.0
+if 'tech_cost_reduction' not in st.session_state:
+    st.session_state.tech_cost_reduction = 1.0
+
+# --- Define functions for preset weight configurations ---
+def set_peace_mode():
+    st.session_state.population_bonus = 3.0    # Focus on citizen growth
+    st.session_state.land_bonus = 1.5          # Modest land bonus
+    st.session_state.infra_cost_reduction = 0.5  # Lower priority for construction speed
+    st.session_state.soldier_efficiency = 0.5    # Minimal military focus
+    st.session_state.income_bonus = 2.0        # Higher emphasis on income
+    st.session_state.happiness = 3.0           # Emphasis on happiness
+    st.session_state.tech_cost_reduction = 1.0  # Average technology benefit
+
+def set_war_mode():
+    st.session_state.population_bonus = 1.0    # Lower emphasis on growing citizens
+    st.session_state.land_bonus = 1.0          # Moderate land bonus
+    st.session_state.infra_cost_reduction = 2.0  # Enhanced infrastructure efficiency for rapid buildup
+    st.session_state.soldier_efficiency = 3.0    # Maximum military focus
+    st.session_state.income_bonus = 1.0        # Income is less prioritized
+    st.session_state.happiness = 0.5           # Happiness is lower priority
+    st.session_state.tech_cost_reduction = 2.0  # Greater focus on reducing tech cost
+
 # --- Streamlit UI ---
 st.title("Cyber Nations Optimal Resource Combination Finder")
 st.markdown("""
@@ -86,15 +121,33 @@ Adjust the metric weights below and click **Calculate** to see optimal 12-resour
 Bonus effects—including technology cost reduction—are integrated into the overall score.
 """)
 
-# Sidebar input, including tech cost reduction slider
+# --- Sidebar Presets ---
+st.sidebar.markdown("### Mode Presets")
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    st.button("Peace Mode", on_click=set_peace_mode)
+with col2:
+    st.button("War Mode", on_click=set_war_mode)
+
+st.sidebar.markdown("### Adjust Weighting Metrics")
+# The number inputs now use the session state values as their defaults.
+st.sidebar.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
+st.sidebar.number_input("Land Bonus Weight", value=st.session_state.land_bonus, step=0.1, key="land_bonus")
+st.sidebar.number_input("Infra Cost Reduction Weight", value=st.session_state.infra_cost_reduction, step=0.1, key="infra_cost_reduction")
+st.sidebar.number_input("Soldier Efficiency Weight", value=st.session_state.soldier_efficiency, step=0.1, key="soldier_efficiency")
+st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bonus, step=0.1, key="income_bonus")
+st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
+st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
+
+# --- Build Weights Dictionary from Session State ---
 weights = {
-    "population_bonus": st.sidebar.number_input("Population Bonus Weight", value=2.0, step=0.1),
-    "land_bonus": st.sidebar.number_input("Land Bonus Weight", value=2.0, step=0.1),
-    "infra_cost_reduction": st.sidebar.number_input("Infra Cost Reduction Weight", value=1.0, step=0.1),
-    "soldier_efficiency": st.sidebar.number_input("Soldier Efficiency Weight", value=1.0, step=0.1),
-    "income_bonus": st.sidebar.number_input("Income Bonus Weight", value=1.5, step=0.1),
-    "happiness": st.sidebar.number_input("Happiness Weight", value=1.0, step=0.1),
-    "tech_cost_reduction": st.sidebar.number_input("Tech Cost Reduction Weight", value=1.0, step=0.1)
+    "population_bonus": st.session_state.population_bonus,
+    "land_bonus": st.session_state.land_bonus,
+    "infra_cost_reduction": st.session_state.infra_cost_reduction,
+    "soldier_efficiency": st.session_state.soldier_efficiency,
+    "income_bonus": st.session_state.income_bonus,
+    "happiness": st.session_state.happiness,
+    "tech_cost_reduction": st.session_state.tech_cost_reduction
 }
 
 if st.sidebar.button("Calculate"):
