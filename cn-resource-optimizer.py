@@ -94,7 +94,7 @@ weights = {
     "soldier_efficiency": st.sidebar.number_input("Soldier Efficiency Weight", value=1.0, step=0.1),
     "income_bonus": st.sidebar.number_input("Income Bonus Weight", value=1.5, step=0.1),
     "happiness": st.sidebar.number_input("Happiness Weight", value=1.0, step=0.1),
-    "tech_cost_reduction": st.sidebar.number_input("Tech Cost Reduction Weight", value=1, step=0.1)
+    "tech_cost_reduction": st.sidebar.number_input("Tech Cost Reduction Weight", value=1.0, step=0.1)
 }
 
 if st.sidebar.button("Calculate"):
