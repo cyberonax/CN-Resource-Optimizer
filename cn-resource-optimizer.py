@@ -80,7 +80,7 @@ def compute_combinations(weights):
     return df.sort_values(by="score", ascending=False)
 
 # --- Streamlit UI ---
-st.title("CyberNations Optimal Resource Combination Finder")
+st.title("Cyber Nations Optimal Resource Combination Finder")
 st.markdown("""
 Adjust the metric weights below and click **Calculate** to see optimal 12-resource combinations along with their triggered bonus resources.
 Bonus effects—including technology cost reduction—are integrated into the overall score.
