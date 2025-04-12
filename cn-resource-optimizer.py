@@ -74,7 +74,10 @@ def evaluate_combination(combo, weights):
 
 @st.cache_data(show_spinner=True)
 def compute_combinations(weights):
-    evaluated = [evaluate_combination(c, weights) for c in itertools.combinations(list(resources.keys()), 12)]
+    # Only consider combinations that include "Uranium"
+    evaluated = [evaluate_combination(c, weights) 
+                 for c in itertools.combinations(list(resources.keys()), 12)
+                 if "Uranium" in c]
     df = pd.DataFrame(evaluated)
     df["combo"] = df["combo"].apply(lambda x: ", ".join(x))
     return df.sort_values(by="score", ascending=False)
