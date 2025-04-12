@@ -73,16 +73,17 @@ def evaluate_combination(combo, weights):
     return {"combo": combo, **scores, "score": total, "bonus_resources": ", ".join(bonus_list) if bonus_list else ""}
 
 @st.cache_data(show_spinner=True)
-def compute_combinations(weights):
-    # Only consider combinations that include "Uranium"
-    evaluated = [evaluate_combination(c, weights) 
-                 for c in itertools.combinations(list(resources.keys()), 12)
-                 if "Uranium" in c]
+def compute_combinations(weights, require_uranium=True):
+    # Generate all 12-resource combinations and filter if Uranium is required
+    combos = itertools.combinations(list(resources.keys()), 12)
+    if require_uranium:
+        combos = (c for c in combos if "Uranium" in c)
+    evaluated = [evaluate_combination(c, weights) for c in combos]
     df = pd.DataFrame(evaluated)
     df["combo"] = df["combo"].apply(lambda x: ", ".join(x))
     return df.sort_values(by="score", ascending=False)
 
-# --- Initialize Session State for weight parameters ---
+# --- Initialize Session State for Weight Parameters ---
 if 'population_bonus' not in st.session_state:
     st.session_state.population_bonus = 2.0
 if 'land_bonus' not in st.session_state:
@@ -98,7 +99,7 @@ if 'happiness' not in st.session_state:
 if 'tech_cost_reduction' not in st.session_state:
     st.session_state.tech_cost_reduction = 1.0
 
-# --- Define functions for preset weight configurations ---
+# --- Define Functions for Preset Weight Configurations ---
 def set_peace_mode():
     st.session_state.population_bonus = 3.0    # Focus on citizen growth
     st.session_state.land_bonus = 1.5          # Modest land bonus
@@ -142,6 +143,9 @@ st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bon
 st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
 st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
 
+# --- Add Uranium Toggle ---
+require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
+
 # --- Build Weights Dictionary from Session State ---
 weights = {
     "population_bonus": st.session_state.population_bonus,
@@ -155,7 +159,7 @@ weights = {
 
 if st.sidebar.button("Calculate"):
     with st.spinner("Computing combinations..."):
-        df_results = compute_combinations(weights)
+        df_results = compute_combinations(weights, require_uranium)
     st.success("Calculation completed!")
     st.subheader("Top 10 Resource Combinations")
     st.dataframe(df_results.head(10))
