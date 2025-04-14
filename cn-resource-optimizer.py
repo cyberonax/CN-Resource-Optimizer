@@ -6,27 +6,8 @@ st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        min-width: 400px;
-        max-width: 800px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Inject CSS for the custom button row.
-st.markdown(
-    """
-    <style>
-    .button-row {
-        display: flex; 
-        justify-content: space-between;
-        margin-bottom: 1rem;
-    }
-    .button-row > div {
-        flex: 1;
-        display: flex;
-        justify-content: center;
+        min-width: 300px;
+        max-width: 300px;
     }
     </style>
     """,
@@ -100,8 +81,10 @@ def evaluate_combination(combo, weights):
     scores = {k: sum(resources[r].get(k, 0) for r in combo) for k in keys}
     base = sum(scores[k] * weights.get(k, 0) for k in keys)
     bonus_list = get_bonus_resources(combo)
-    bonus_score = sum(bonus_values.get(b, {}).get(k, 0) * weights.get(k, 0)
-                      for b in bonus_list for k in bonus_values.get(b, {}))
+    bonus_score = sum(
+        bonus_values.get(b, {}).get(k, 0) * weights.get(k, 0)
+        for b in bonus_list for k in bonus_values.get(b, {})
+    )
     total = base + bonus_score
     return {"combo": combo, **scores, "score": total, "bonus_resources": ", ".join(bonus_list) if bonus_list else ""}
 
@@ -202,16 +185,14 @@ st.title("Cyber Nations | Optimal Resource Combination Finder")
 # Sidebar Controls
 st.sidebar.markdown("## Settings")
 
-# Wrap the button row in a div with class "button-row" to apply our CSS.
-st.sidebar.markdown('<div class="button-row">', unsafe_allow_html=True)
-cols = st.sidebar.columns(3)
-with cols[0]:
-    generate_pressed = st.button("Generate")
-with cols[1]:
-    st.button("Peace Mode", on_click=set_peace_mode)
-with cols[2]:
-    st.button("War Mode", on_click=set_war_mode)
-st.sidebar.markdown('</div>', unsafe_allow_html=True)
+# Row with Generate, Peace Mode, and War Mode Buttons.
+col_gen, col_peace, col_war = st.sidebar.columns(3)
+with col_gen:
+    generate_pressed = st.button("Generate Combinations", use_container_width=True)
+with col_peace:
+    st.button("Peace Mode", on_click=set_peace_mode, use_container_width=True)
+with col_war:
+    st.button("War Mode", on_click=set_war_mode, use_container_width=True)
 
 # Show the "Use Custom Weightings" checkbox only if not in War mode.
 if st.session_state.mode != "War":
