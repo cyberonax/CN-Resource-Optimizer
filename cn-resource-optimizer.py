@@ -1,35 +1,13 @@
 import streamlit as st, itertools, pandas as pd
 from io import BytesIO
 
-# Inject JavaScript to automatically open the sidebar on UI load.
-st.markdown(
-    """
-    <script>
-    // Wait until the page is loaded and then click the collapsed control if needed.
-    (function() {
-      const interval = setInterval(() => {
-        const btn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
-        if (btn) {
-          // If the sidebar is collapsed (aria-expanded is false), click the toggle button to open it.
-          if (btn.getAttribute("aria-expanded") === "false") {
-            btn.click();
-          }
-          clearInterval(interval);
-        }
-      }, 100);
-    })();
-    </script>
-    """,
-    unsafe_allow_html=True
-)
-
 # Set default sidebar width using custom CSS.
 st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        min-width: 400px;
-        max-width: 400px;
+        min-width: 450px;
+        max-width: 450px;
     }
     </style>
     """,
@@ -222,12 +200,12 @@ if st.session_state.mode != "War":
 else:
     use_custom = False
 
-# For Peace Mode, display the preset toggles in two columns.
+# When in Peace/Default modes and not using custom weighting, show preset Nation Level options in two columns.
 if st.session_state.mode in ["Peace", "Default"] and not use_custom:
-    st.sidebar.markdown("### Nation Level (Peace Mode)")
+    st.sidebar.markdown("#### Nation Level (Peace Mode)")
     col_left, col_right = st.sidebar.columns(2)
     with col_left:
-        if st.button("Default", key="default"):
+        if st.button("Default", key="default_level"):
             set_default_mode()
         if st.button("Level A", key="level_a"):
             set_level_a()
