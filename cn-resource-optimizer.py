@@ -7,7 +7,7 @@ st.markdown(
     <style>
     [data-testid="stSidebar"] {
         min-width: 0px;
-        max-width: 400px;
+        max-width: 420px;
     }
     </style>
     """,
@@ -201,7 +201,7 @@ else:
     use_custom = False
 
 if st.session_state.mode in ["Peace", "Default"] and not use_custom:
-    # Radio options include Default, Level A, Level B, and Level C.
+    # Radio options include Default - Growth, Level A - Tech Seller, Level B - Tech Buyer, and Level C - Ancient.
     selected_level = st.sidebar.radio("Nation Level (Peace Mode)",
                                       ["Default", "Level A", "Level B", "Level C"],
                                       key="nation_level_option")
