@@ -193,7 +193,7 @@ st.title("Cyber Nations | Optimal Resource Combination Finder")
 # Create two tabs: one for computing resource combinations and one for optimizing weight selections
 tabs = st.tabs(["Optimize Resource Combinations", "Optimize Weights"])
 
-# --- Sidebar for Mode Presets and Nation Level ---
+# --- Sidebar for Mode Presets and Custom Weighting Toggle ---
 st.sidebar.markdown("### Mode Presets")
 col1, col2 = st.sidebar.columns(2)
 with col1:
@@ -201,8 +201,11 @@ with col1:
 with col2:
     st.button("War Mode", on_click=set_war_mode)
 
-# Show nation level selection only for Peace Mode
-if st.session_state.mode == "Peace":
+# Custom weighting toggle: if checked, nation level presets are disabled and manual weightings are used.
+use_custom = st.sidebar.checkbox("Use Custom Weightings Instead of Nation Level Presets", value=False, key="use_custom")
+
+# Show nation level selection only for Peace Mode if not using custom weightings
+if st.session_state.mode == "Peace" and not use_custom:
     selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Level A", "Level B", "Level C"], key="nation_level_option")
     if selected_level == "Level A":
         set_level_a()
