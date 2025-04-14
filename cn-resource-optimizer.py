@@ -125,7 +125,7 @@ if 'tech_cost_reduction' not in st.session_state:
 if 'mode' not in st.session_state:
     st.session_state.mode = "Peace"
 if 'nation_level_option' not in st.session_state:
-    st.session_state.nation_level_option = "Default"
+    st.session_state.nation_level_option = "Default — Growth"
 
 # --- Define Functions for Preset Configurations ---
 def set_default_mode():
