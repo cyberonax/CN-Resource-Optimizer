@@ -158,7 +158,6 @@ def set_level_a():
     st.session_state.income_bonus = 1.5            # Standard income bonus
     st.session_state.happiness = 1.0               # Standard happiness bonus
     st.session_state.tech_cost_reduction = 3.0     # High priority on tech cost reduction, critical for sellers
-    st.session_state.nation_level_option = "Level A"
 
 def set_level_b():
     # For Level B (1000-2000 Days Old Tech Buyers)
@@ -169,7 +168,6 @@ def set_level_b():
     st.session_state.income_bonus = 1.5            # Standard income bonus
     st.session_state.happiness = 1.0               # Standard happiness bonus
     st.session_state.tech_cost_reduction = 1.5     # Moderate tech benefit (buyers need less tech cost reduction)
-    st.session_state.nation_level_option = "Level B"
 
 def set_level_c():
     # For Level C (>2000 Days Old Tech Buyers)
@@ -180,7 +178,6 @@ def set_level_c():
     st.session_state.income_bonus = 1.5            # Standard income bonus
     st.session_state.happiness = 1.0               # Standard happiness bonus
     st.session_state.tech_cost_reduction = 1.0     # Minimal emphasis on tech cost reduction, buyers benefit less here
-    st.session_state.nation_level_option = "Level C"
 
 # --- Streamlit UI ---
 st.title("Cyber Nations | Optimal Resource Combination Finder")
