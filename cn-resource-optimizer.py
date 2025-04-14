@@ -6,8 +6,8 @@ st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        min-width: 500px;
-        max-width: 500px;
+        min-width: 450px;
+        max-width: 450px;
     }
     </style>
     """,
