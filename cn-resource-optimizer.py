@@ -6,8 +6,8 @@ st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        min-width: 450px;
-        max-width: 450px;
+        min-width: 300px;
+        max-width: 300px;
     }
     </style>
     """,
@@ -185,12 +185,21 @@ st.sidebar.markdown("## Settings")
 
 # Row with Generate, Peace Mode, and War Mode Buttons.
 col_gen, col_peace, col_war = st.sidebar.columns(3)
+
 with col_gen:
+    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
     generate_pressed = st.button("Generate")
+    st.markdown("</div>", unsafe_allow_html=True)
+
 with col_peace:
+    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
     st.button("Peace Mode", on_click=set_peace_mode)
+    st.markdown("</div>", unsafe_allow_html=True)
+
 with col_war:
+    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
     st.button("War Mode", on_click=set_war_mode)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # Show the "Use Custom Weightings" checkbox only if not in War mode.
 if st.session_state.mode != "War":
