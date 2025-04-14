@@ -112,7 +112,7 @@ if 'tech_cost_reduction' not in st.session_state:
 if 'mode' not in st.session_state:
     st.session_state.mode = "Peace"
 if 'nation_level_option' not in st.session_state:
-    st.session_state.nation_level_option = "Level A"
+    st.session_state.nation_level_option = "Default"
 
 # --- Define Functions for Preset Configurations ---
 def set_peace_mode():
@@ -179,13 +179,15 @@ with col2:
 # Custom weighting vs nation-level presets.
 use_custom = st.sidebar.checkbox("Use Custom Weightings Instead of Nation Level Presets", value=False, key="use_custom")
 if st.session_state.mode == "Peace" and not use_custom:
-    selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Level A", "Level B", "Level C"], key="nation_level_option")
+    # Add a "Default" option above the level choices.
+    selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Default", "Level A", "Level B", "Level C"], key="nation_level_option")
     if selected_level == "Level A":
         set_level_a()
     elif selected_level == "Level B":
         set_level_b()
     elif selected_level == "Level C":
         set_level_c()
+    # If "Default" is selected, no changes are made to the current weights.
 
 # Weighting inputs.
 st.sidebar.markdown("### Adjust Weighting Metrics")
@@ -197,9 +199,9 @@ st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bon
 st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
 st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
 
-# Bonus filter selection.
+# Bonus filter selection (default is empty).
 st.sidebar.markdown("### Bonus Filter")
-desired_bonuses = st.sidebar.multiselect("Select Desired Bonus Resources", list(bonus_values.keys()))
+desired_bonuses = st.sidebar.multiselect("Select Desired Bonus Resources", list(bonus_values.keys()), default=[])
 
 # Uranium toggle.
 require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
