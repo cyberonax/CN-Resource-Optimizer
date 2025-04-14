@@ -1,7 +1,7 @@
 import streamlit as st, itertools, pandas as pd
 from io import BytesIO
 
-# Set default sidebar width using custom CSS.
+# Set default sidebar width to 450px using custom CSS.
 st.markdown(
     """
     <style>
@@ -185,7 +185,7 @@ st.title("Cyber Nations | Optimal Resource Combination Finder")
 # Sidebar Controls
 st.sidebar.markdown("## Settings")
 
-# Row with Generate, Peace Mode, and War Mode Buttons.
+# Row with Generate, Peace Mode, and War Mode Buttons in three equally-sized columns.
 col_gen, col_peace, col_war = st.sidebar.columns(3)
 with col_gen:
     generate_pressed = st.button("Generate", use_container_width=True)
@@ -200,20 +200,19 @@ if st.session_state.mode != "War":
 else:
     use_custom = False
 
-# When in Peace/Default modes and not using custom weighting, show preset Nation Level options in two columns.
 if st.session_state.mode in ["Peace", "Default"] and not use_custom:
-    st.sidebar.markdown("#### Nation Level (Peace Mode)")
-    col_left, col_right = st.sidebar.columns(2)
-    with col_left:
-        if st.button("Default", key="default_level"):
-            set_default_mode()
-        if st.button("Level A", key="level_a"):
-            set_level_a()
-    with col_right:
-        if st.button("Level B", key="level_b"):
-            set_level_b()
-        if st.button("Level C", key="level_c"):
-            set_level_c()
+    # Radio options include Default, Level A, Level B, and Level C.
+    selected_level = st.sidebar.radio("Nation Level (Peace Mode)",
+                                      ["Default", "Level A", "Level B", "Level C"],
+                                      key="nation_level_option")
+    if selected_level == "Default":
+        set_default_mode()
+    elif selected_level == "Level A":
+        set_level_a()
+    elif selected_level == "Level B":
+        set_level_b()
+    elif selected_level == "Level C":
+        set_level_c()
 
 # Weighting inputs, arranged in two columns.
 st.sidebar.markdown("### Adjust Weighting Metrics")
