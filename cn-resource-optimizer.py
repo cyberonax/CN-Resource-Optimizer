@@ -68,7 +68,10 @@ def evaluate_combination(combo, weights):
     scores = {k: sum(resources[r].get(k, 0) for r in combo) for k in keys}
     base = sum(scores[k] * weights.get(k, 0) for k in keys)
     bonus_list = get_bonus_resources(combo)
-    bonus_score = sum(bonus_values.get(b, {}).get(k, 0) * weights.get(k, 0) for b in bonus_list for k in bonus_values.get(b, {}))
+    bonus_score = sum(
+        bonus_values.get(b, {}).get(k, 0) * weights.get(k, 0)
+        for b in bonus_list for k in bonus_values.get(b, {})
+    )
     total = base + bonus_score
     return {"combo": combo, **scores, "score": total, "bonus_resources": ", ".join(bonus_list) if bonus_list else ""}
 
@@ -81,7 +84,7 @@ def compute_combinations(weights, require_uranium=True, desired_bonus_filter=Non
     evaluated = [evaluate_combination(c, weights) for c in combos]
     df = pd.DataFrame(evaluated)
     df["combo"] = df["combo"].apply(lambda x: ", ".join(x))
-    # --- Filter by desired bonus resources if provided ---
+    # Filter by desired bonus resources, if provided.
     if desired_bonus_filter:
         def bonus_filter(row):
             if not row["bonus_resources"]:
@@ -91,7 +94,7 @@ def compute_combinations(weights, require_uranium=True, desired_bonus_filter=Non
         df = df[df.apply(bonus_filter, axis=1)]
     return df.sort_values(by="score", ascending=False)
 
-# --- Initialize Session State for Weight Parameters and Mode ---
+# --- Session State Initialization for Weights and Mode ---
 if 'population_bonus' not in st.session_state:
     st.session_state.population_bonus = 2.0
 if 'land_bonus' not in st.session_state:
@@ -107,11 +110,11 @@ if 'happiness' not in st.session_state:
 if 'tech_cost_reduction' not in st.session_state:
     st.session_state.tech_cost_reduction = 1.0
 if 'mode' not in st.session_state:
-    st.session_state.mode = "Peace"  # Default mode is Peace Mode
+    st.session_state.mode = "Peace"
 if 'nation_level_option' not in st.session_state:
-    st.session_state.nation_level_option = "Level A"  # Default for Peace Mode
+    st.session_state.nation_level_option = "Level A"
 
-# --- Define Functions for Preset Weight Configurations ---
+# --- Define Functions for Preset Configurations ---
 def set_peace_mode():
     st.session_state.population_bonus = 3.0
     st.session_state.land_bonus = 1.5
@@ -162,10 +165,10 @@ def set_level_c():
 # --- Streamlit UI ---
 st.title("Cyber Nations | Optimal Resource Combination Finder")
 
-# Create two tabs: one for computing resource combinations and one for filtering bonus resources
-tabs = st.tabs(["Optimize Resource Combinations", "Filter by Bonus Resources"])
+# Sidebar Controls
+st.sidebar.markdown("## Settings")
 
-# --- Sidebar for Mode Presets and Custom Weighting Toggle ---
+# Mode Presets
 st.sidebar.markdown("### Mode Presets")
 col1, col2 = st.sidebar.columns(2)
 with col1:
@@ -173,8 +176,8 @@ with col1:
 with col2:
     st.button("War Mode", on_click=set_war_mode)
 
+# Custom weighting vs nation-level presets.
 use_custom = st.sidebar.checkbox("Use Custom Weightings Instead of Nation Level Presets", value=False, key="use_custom")
-
 if st.session_state.mode == "Peace" and not use_custom:
     selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Level A", "Level B", "Level C"], key="nation_level_option")
     if selected_level == "Level A":
@@ -184,78 +187,50 @@ if st.session_state.mode == "Peace" and not use_custom:
     elif selected_level == "Level C":
         set_level_c()
 
-# --- Tab 1: Resource Combinations ---
-with tabs[0]:
-    st.markdown("""
-    Adjust the metric weights below and click **Calculate** to see optimal 12-resource combinations along with their triggered bonus resources.
-    Bonus effects are integrated into the overall score.
-    """)
-    st.sidebar.markdown("### Adjust Weighting Metrics")
-    st.sidebar.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
-    st.sidebar.number_input("Land Bonus Weight", value=st.session_state.land_bonus, step=0.1, key="land_bonus")
-    st.sidebar.number_input("Infra Cost Reduction Weight", value=st.session_state.infra_cost_reduction, step=0.1, key="infra_cost_reduction")
-    st.sidebar.number_input("Soldier Efficiency Weight", value=st.session_state.soldier_efficiency, step=0.1, key="soldier_efficiency")
-    st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bonus, step=0.1, key="income_bonus")
-    st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
-    st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
-    
-    require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
-    
-    # Build Weights Dictionary from Session State values.
-    weights = {
-        "population_bonus": st.session_state.population_bonus,
-        "land_bonus": st.session_state.land_bonus,
-        "infra_cost_reduction": st.session_state.infra_cost_reduction,
-        "soldier_efficiency": st.session_state.soldier_efficiency,
-        "income_bonus": st.session_state.income_bonus,
-        "happiness": st.session_state.happiness,
-        "tech_cost_reduction": st.session_state.tech_cost_reduction
-    }
-    
-    if st.sidebar.button("Calculate"):
-        with st.spinner("Computing combinations..."):
-            df_results = compute_combinations(weights, require_uranium)
-        st.success("Calculation completed!")
-        st.subheader("Top 10 Resource Combinations")
-        st.dataframe(df_results.head(10))
-        def to_excel(df):
-            output = BytesIO()
-            writer = pd.ExcelWriter(output, engine='xlsxwriter')
-            df.to_excel(writer, index=False, sheet_name="Results")
-            writer.close()
-            return output.getvalue()
-        st.download_button("Download Results", data=to_excel(df_results),
-                           file_name="CyberNations_Optimal_Resource_Combinations.xlsx",
-                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+# Weighting inputs.
+st.sidebar.markdown("### Adjust Weighting Metrics")
+st.sidebar.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
+st.sidebar.number_input("Land Bonus Weight", value=st.session_state.land_bonus, step=0.1, key="land_bonus")
+st.sidebar.number_input("Infra Cost Reduction Weight", value=st.session_state.infra_cost_reduction, step=0.1, key="infra_cost_reduction")
+st.sidebar.number_input("Soldier Efficiency Weight", value=st.session_state.soldier_efficiency, step=0.1, key="soldier_efficiency")
+st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bonus, step=0.1, key="income_bonus")
+st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
+st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
 
-# --- Tab 2: Filter by Bonus Resources ---
-with tabs[1]:
-    st.header("Filter Resource Combinations by Desired Bonus Resources")
-    st.markdown("Select the bonus resources you want to see in the generated combinations. Only combinations that naturally trigger the desired bonus resources will be shown.")
-    desired_bonuses = st.multiselect("Select Desired Bonus Resources", list(bonus_values.keys()))
+# Bonus filter selection.
+st.sidebar.markdown("### Bonus Filter")
+desired_bonuses = st.sidebar.multiselect("Select Desired Bonus Resources", list(bonus_values.keys()))
+
+# Uranium toggle.
+require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
+
+# Compute Weights Dictionary.
+weights = {
+    "population_bonus": st.session_state.population_bonus,
+    "land_bonus": st.session_state.land_bonus,
+    "infra_cost_reduction": st.session_state.infra_cost_reduction,
+    "soldier_efficiency": st.session_state.soldier_efficiency,
+    "income_bonus": st.session_state.income_bonus,
+    "happiness": st.session_state.happiness,
+    "tech_cost_reduction": st.session_state.tech_cost_reduction
+}
+
+# Button to generate and display combinations.
+if st.sidebar.button("Generate Combinations"):
+    with st.spinner("Generating combinations..."):
+        df_results = compute_combinations(weights, require_uranium, desired_bonus_filter=desired_bonuses)
+    st.success("Combinations generated!")
+    st.subheader("Top 10 Optimal Resource Combinations")
+    st.dataframe(df_results.head(10))
     
-    if st.button("Generate Combinations", key="generate_combinations"):
-        weights = {
-            "population_bonus": st.session_state.population_bonus,
-            "land_bonus": st.session_state.land_bonus,
-            "infra_cost_reduction": st.session_state.infra_cost_reduction,
-            "soldier_efficiency": st.session_state.soldier_efficiency,
-            "income_bonus": st.session_state.income_bonus,
-            "happiness": st.session_state.happiness,
-            "tech_cost_reduction": st.session_state.tech_cost_reduction
-        }
-        require_uranium = st.checkbox("Require Uranium in combinations (for filtering)", value=True, key="filter_generate_uranium")
-        with st.spinner("Generating filtered combinations..."):
-            df_results = compute_combinations(weights, require_uranium, desired_bonus_filter=desired_bonuses)
-        st.success("Filtered combinations generated!")
-        st.subheader("Top 10 Filtered Resource Combinations")
-        st.dataframe(df_results.head(10))
-        def to_excel(df):
-            output = BytesIO()
-            writer = pd.ExcelWriter(output, engine='xlsxwriter')
-            df.to_excel(writer, index=False, sheet_name="FilteredResults")
-            writer.close()
-            return output.getvalue()
-        st.download_button("Download Filtered Results", data=to_excel(df_results),
-                           file_name="CyberNations_Filtered_Resource_Combinations.xlsx",
-                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    # Provide an option to download the results.
+    def to_excel(df):
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        df.to_excel(writer, index=False, sheet_name="Results")
+        writer.close()
+        return output.getvalue()
+    
+    st.download_button("Download Results", data=to_excel(df_results),
+                       file_name="CyberNations_Optimal_Resource_Combinations.xlsx",
+                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
