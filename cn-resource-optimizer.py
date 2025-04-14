@@ -6,8 +6,8 @@ st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        min-width: 400px;
-        max-width: 400px;
+        min-width: 300px;
+        max-width: 800px;
     }
     </style>
     """,
@@ -188,7 +188,7 @@ st.sidebar.markdown("## Settings")
 # Row with Generate, Peace Mode, and War Mode Buttons.
 col_gen, col_peace, col_war = st.sidebar.columns(3)
 with col_gen:
-    generate_pressed = st.button("Generate Combinations", use_container_width=True)
+    generate_pressed = st.button("Generate", use_container_width=True)
 with col_peace:
     st.button("Peace Mode", on_click=set_peace_mode, use_container_width=True)
 with col_war:
