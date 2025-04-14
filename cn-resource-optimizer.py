@@ -106,7 +106,7 @@ def optimize_weights(desired_bonuses):
             new_weights[key] += value
     return new_weights
 
-# --- Initialize Session State for Weight Parameters ---
+# --- Initialize Session State for Weight Parameters and Mode ---
 if 'population_bonus' not in st.session_state:
     st.session_state.population_bonus = 2.0
 if 'land_bonus' not in st.session_state:
@@ -121,16 +121,22 @@ if 'happiness' not in st.session_state:
     st.session_state.happiness = 1.0
 if 'tech_cost_reduction' not in st.session_state:
     st.session_state.tech_cost_reduction = 1.0
+if 'mode' not in st.session_state:
+    st.session_state.mode = "Peace"  # Default mode is Peace Mode
+if 'nation_level_option' not in st.session_state:
+    st.session_state.nation_level_option = "Level A"  # Default for Peace Mode
 
 # --- Define Functions for Preset Weight Configurations ---
+
 def set_peace_mode():
-    st.session_state.population_bonus = 3.0    # Focus on citizen growth
+    st.session_state.population_bonus = 3.0    # Focus on citizen growth (default for Peace Mode)
     st.session_state.land_bonus = 1.5          # Modest land bonus
     st.session_state.infra_cost_reduction = 0.5  # Lower priority for construction speed
     st.session_state.soldier_efficiency = 0.5    # Minimal military focus
     st.session_state.income_bonus = 2.0        # Higher emphasis on income
     st.session_state.happiness = 3.0           # Emphasis on happiness
     st.session_state.tech_cost_reduction = 1.0  # Average technology benefit
+    st.session_state.mode = "Peace"            # Set mode to Peace
 
 def set_war_mode():
     st.session_state.population_bonus = 1.0    # Lower emphasis on growing citizens
@@ -140,6 +146,41 @@ def set_war_mode():
     st.session_state.income_bonus = 1.0        # Income is less prioritized
     st.session_state.happiness = 0.5           # Happiness is lower priority
     st.session_state.tech_cost_reduction = 2.0  # Greater focus on reducing tech cost
+    st.session_state.mode = "War"              # Set mode to War
+
+# New functions for nation-level presets (for Peace Mode only)
+def set_level_a():
+    # For Level A (<1000 Days Old Tech Sellers)
+    st.session_state.population_bonus = 2.0      # Lower emphasis on citizen growth compared to buyers
+    st.session_state.land_bonus = 2.0              # Standard land bonus remains
+    st.session_state.infra_cost_reduction = 1.5     # Moderate infrastructure upkeep benefits
+    st.session_state.soldier_efficiency = 1.0       # Standard military metric
+    st.session_state.income_bonus = 1.5            # Standard income bonus
+    st.session_state.happiness = 1.0               # Standard happiness bonus
+    st.session_state.tech_cost_reduction = 3.0     # High priority on tech cost reduction, critical for sellers
+    st.session_state.nation_level_option = "Level A"
+
+def set_level_b():
+    # For Level B (1000-2000 Days Old Tech Buyers)
+    st.session_state.population_bonus = 2.5      # Increased citizen growth priority
+    st.session_state.land_bonus = 2.0              # Standard land bonus
+    st.session_state.infra_cost_reduction = 2.0     # Higher emphasis on cheaper infrastructure upkeep
+    st.session_state.soldier_efficiency = 1.0       # Standard military metric
+    st.session_state.income_bonus = 1.5            # Standard income bonus
+    st.session_state.happiness = 1.0               # Standard happiness bonus
+    st.session_state.tech_cost_reduction = 1.5     # Moderate tech benefit (buyers need less tech cost reduction)
+    st.session_state.nation_level_option = "Level B"
+
+def set_level_c():
+    # For Level C (>2000 Days Old Tech Buyers)
+    st.session_state.population_bonus = 3.0      # High priority on expanding the citizen base
+    st.session_state.land_bonus = 2.0              # Standard land bonus
+    st.session_state.infra_cost_reduction = 2.5     # Emphasis on cheaper infrastructure upkeep
+    st.session_state.soldier_efficiency = 1.0       # Standard military metric
+    st.session_state.income_bonus = 1.5            # Standard income bonus
+    st.session_state.happiness = 1.0               # Standard happiness bonus
+    st.session_state.tech_cost_reduction = 1.0     # Minimal emphasis on tech cost reduction, buyers benefit less here
+    st.session_state.nation_level_option = "Level C"
 
 # --- Streamlit UI ---
 st.title("Cyber Nations | Optimal Resource Combination Finder")
@@ -147,20 +188,30 @@ st.title("Cyber Nations | Optimal Resource Combination Finder")
 # Create two tabs: one for computing resource combinations and one for optimizing weight selections
 tabs = st.tabs(["Optimize Resource Combinations", "Optimize Weights"])
 
+# --- Sidebar for Mode Presets and Nation Level ---
+st.sidebar.markdown("### Mode Presets")
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    st.button("Peace Mode", on_click=set_peace_mode)
+with col2:
+    st.button("War Mode", on_click=set_war_mode)
+
+# Show nation level selection only for Peace Mode
+if st.session_state.mode == "Peace":
+    selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Level A", "Level B", "Level C"], key="nation_level_option")
+    if selected_level == "Level A":
+        set_level_a()
+    elif selected_level == "Level B":
+        set_level_b()
+    elif selected_level == "Level C":
+        set_level_c()
+
 # --- Tab 1: Resource Combinations ---
 with tabs[0]:
     st.markdown("""
     Adjust the metric weights below and click **Calculate** to see optimal 12-resource combinations along with their triggered bonus resources.
     Bonus effects are integrated into the overall score.
     """)
-    # --- Sidebar Presets ---
-    st.sidebar.markdown("### Mode Presets")
-    col1, col2 = st.sidebar.columns(2)
-    with col1:
-        st.button("Peace Mode", on_click=set_peace_mode)
-    with col2:
-        st.button("War Mode", on_click=set_war_mode)
-    
     st.sidebar.markdown("### Adjust Weighting Metrics")
     # The number inputs now use the session state values as their defaults.
     st.sidebar.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
@@ -217,3 +268,34 @@ with tabs[1]:
         # Instead of updating individual session state keys, store the optimized configuration separately.
         st.session_state.optimized_weights = new_weights
         st.success("Optimized weights have been saved!")
+    
+    # --- Generate Combinations with Optimized Weights ---
+    if st.button("Generate Combinations", key="generate_combinations"):
+        # Use the optimized weights if available; otherwise, use the widget values.
+        if "optimized_weights" in st.session_state:
+            weights = st.session_state.optimized_weights
+        else:
+            weights = {
+                "population_bonus": st.session_state.population_bonus,
+                "land_bonus": st.session_state.land_bonus,
+                "infra_cost_reduction": st.session_state.infra_cost_reduction,
+                "soldier_efficiency": st.session_state.soldier_efficiency,
+                "income_bonus": st.session_state.income_bonus,
+                "happiness": st.session_state.happiness,
+                "tech_cost_reduction": st.session_state.tech_cost_reduction
+            }
+        require_uranium = st.checkbox("Require Uranium in combinations (for optimized calculation)", value=True, key="opt_generate_uranium")
+        with st.spinner("Generating combinations with optimized weights..."):
+            df_results = compute_combinations(weights, require_uranium)
+        st.success("Optimized combinations generated!")
+        st.subheader("Top 10 Optimized Resource Combinations")
+        st.dataframe(df_results.head(10))
+        def to_excel(df):
+            output = BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            df.to_excel(writer, index=False, sheet_name="OptimizedResults")
+            writer.close()
+            return output.getvalue()
+        st.download_button("Download Optimized Results", data=to_excel(df_results),
+                           file_name="CyberNations_Optimized_Resource_Combinations.xlsx",
+                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
