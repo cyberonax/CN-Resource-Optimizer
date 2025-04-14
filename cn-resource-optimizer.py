@@ -1,6 +1,19 @@
 import streamlit as st, itertools, pandas as pd
 from io import BytesIO
 
+# Set default sidebar width using custom CSS.
+st.markdown(
+    """
+    <style>
+    [data-testid="stSidebar"] {
+        min-width: 300px;
+        max-width: 300px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- Main Resource Definitions (simplified values) ---
 resources = {
     "Aluminum": {"population_bonus": 0, "land_bonus": 0, "infra_cost_reduction": 7, "soldier_efficiency": 20, "tech_cost_reduction": 0},
@@ -165,7 +178,7 @@ def set_level_c():
     st.session_state.tech_cost_reduction = 1.0
 
 # --- Streamlit UI ---
-st.title("Cyber Nations | Resource Combination Optimizer")
+st.title("Cyber Nations | Optimal Resource Combination Finder")
 
 # Sidebar Controls
 st.sidebar.markdown("## Settings")
@@ -173,7 +186,7 @@ st.sidebar.markdown("## Settings")
 # Row with Generate, Peace Mode, and War Mode Buttons.
 col_gen, col_peace, col_war = st.sidebar.columns(3)
 with col_gen:
-    generate_pressed = st.button("Generate")
+    generate_pressed = st.button("Generate Combinations")
 with col_peace:
     st.button("Peace Mode", on_click=set_peace_mode)
 with col_war:
