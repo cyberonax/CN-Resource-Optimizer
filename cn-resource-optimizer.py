@@ -158,7 +158,7 @@ def set_level_a():
     st.session_state.infra_cost_reduction = 1.5
     st.session_state.soldier_efficiency = 1.0
     st.session_state.income_bonus = 1.5
-    st.session_state.happiness = 1.0
+    st.session_state.happiness = 2.0
     st.session_state.tech_cost_reduction = 3.0
 
 def set_level_b():
@@ -167,8 +167,8 @@ def set_level_b():
     st.session_state.infra_cost_reduction = 2.0
     st.session_state.soldier_efficiency = 1.0
     st.session_state.income_bonus = 2.0
-    st.session_state.happiness = 1.0
-    st.session_state.tech_cost_reduction = 0.5
+    st.session_state.happiness = 1.5
+    st.session_state.tech_cost_reduction = 1.0
 
 def set_level_c():
     st.session_state.population_bonus = 3.0
