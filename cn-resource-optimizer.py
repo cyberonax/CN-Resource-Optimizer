@@ -205,13 +205,13 @@ if st.session_state.mode in ["Peace", "Default"] and not use_custom:
     selected_level = st.sidebar.radio("Nation Level (Peace Mode)",
                                       ["Default", "Level A", "Level B", "Level C"],
                                       key="nation_level_option")
-    if selected_level == "Default":
+    if selected_level == "Default - Growth":
         set_default_mode()
-    elif selected_level == "Level A":
+    elif selected_level == "Level A - Tech Seller":
         set_level_a()
-    elif selected_level == "Level B":
+    elif selected_level == "Level B - Tech Buyer":
         set_level_b()
-    elif selected_level == "Level C":
+    elif selected_level == "Level C - Ancient":
         set_level_c()
 
 # Weighting inputs, arranged in two columns.
