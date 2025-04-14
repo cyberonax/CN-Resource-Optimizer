@@ -6,8 +6,8 @@ st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
-        min-width: 400px;
-        max-width: 400px;
+        min-width: 300px;
+        max-width: 800px;
     }
     </style>
     """,
@@ -188,7 +188,7 @@ col_gen, col_peace, col_war = st.sidebar.columns(3)
 
 with col_gen:
     st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-    generate_pressed = st.button("Generate")
+    generate_pressed = st.button("GO")
     st.markdown("</div>", unsafe_allow_html=True)
 
 with col_peace:
