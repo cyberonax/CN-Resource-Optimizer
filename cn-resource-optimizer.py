@@ -168,7 +168,7 @@ def set_level_b():
     st.session_state.soldier_efficiency = 1.0
     st.session_state.income_bonus = 1.5
     st.session_state.happiness = 1.0
-    st.session_state.tech_cost_reduction = 1.5
+    st.session_state.tech_cost_reduction = 1.0
 
 def set_level_c():
     st.session_state.population_bonus = 3.0
@@ -203,7 +203,7 @@ else:
 if st.session_state.mode in ["Peace", "Default"] and not use_custom:
     # Radio options include Default - Growth, Level A - Tech Seller, Level B - Tech Buyer, and Level C - Ancient.
     selected_level = st.sidebar.radio("Nation Level (Peace Mode)",
-                                      ["Default", "Level A", "Level B", "Level C"],
+                                      ["Default - Growth", "Level A - Tech Seller", "Level B - Tech Buyer", "Level C - Ancient"],
                                       key="nation_level_option")
     if selected_level == "Default - Growth":
         set_default_mode()
