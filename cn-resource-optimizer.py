@@ -179,15 +179,16 @@ with col2:
 # Custom weighting vs nation-level presets.
 use_custom = st.sidebar.checkbox("Use Custom Weightings Instead of Nation Level Presets", value=False, key="use_custom")
 if st.session_state.mode == "Peace" and not use_custom:
-    # Add a "Default" option above the level choices.
+    # Add a "Default" option that uses the Peace Mode baseline settings.
     selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Default", "Level A", "Level B", "Level C"], key="nation_level_option")
-    if selected_level == "Level A":
+    if selected_level == "Default":
+        set_peace_mode()
+    elif selected_level == "Level A":
         set_level_a()
     elif selected_level == "Level B":
         set_level_b()
     elif selected_level == "Level C":
         set_level_c()
-    # If "Default" is selected, no changes are made to the current weights.
 
 # Weighting inputs.
 st.sidebar.markdown("### Adjust Weighting Metrics")
