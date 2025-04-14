@@ -1,13 +1,35 @@
 import streamlit as st, itertools, pandas as pd
 from io import BytesIO
 
+# Inject JavaScript to automatically open the sidebar on UI load.
+st.markdown(
+    """
+    <script>
+    // Wait until the page is loaded and then click the collapsed control if needed.
+    (function() {
+      const interval = setInterval(() => {
+        const btn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+        if (btn) {
+          // If the sidebar is collapsed (aria-expanded is false), click the toggle button to open it.
+          if (btn.getAttribute("aria-expanded") === "false") {
+            btn.click();
+          }
+          clearInterval(interval);
+        }
+      }, 100);
+    })();
+    </script>
+    """,
+    unsafe_allow_html=True
+)
+
 # Set default sidebar width using custom CSS.
 st.markdown(
     """
     <style>
     [data-testid="stSidebar"] {
         min-width: 300px;
-        max-width: 800px;
+        max-width: 300px;
     }
     </style>
     """,
@@ -188,7 +210,7 @@ st.sidebar.markdown("## Settings")
 # Row with Generate, Peace Mode, and War Mode Buttons.
 col_gen, col_peace, col_war = st.sidebar.columns(3)
 with col_gen:
-    generate_pressed = st.button("Generate", use_container_width=True)
+    generate_pressed = st.button("Generate Combinations", use_container_width=True)
 with col_peace:
     st.button("Peace Mode", on_click=set_peace_mode, use_container_width=True)
 with col_war:
@@ -200,19 +222,20 @@ if st.session_state.mode != "War":
 else:
     use_custom = False
 
+# For Peace Mode, display the preset toggles in two columns.
 if st.session_state.mode in ["Peace", "Default"] and not use_custom:
-    # Radio options include Default, Level A, Level B, and Level C.
-    selected_level = st.sidebar.radio("Nation Level (Peace Mode)",
-                                      ["Default", "Level A", "Level B", "Level C"],
-                                      key="nation_level_option")
-    if selected_level == "Default":
-        set_default_mode()
-    elif selected_level == "Level A":
-        set_level_a()
-    elif selected_level == "Level B":
-        set_level_b()
-    elif selected_level == "Level C":
-        set_level_c()
+    st.sidebar.markdown("### Nation Level (Peace Mode)")
+    col_left, col_right = st.sidebar.columns(2)
+    with col_left:
+        if st.button("Default", key="default"):
+            set_default_mode()
+        if st.button("Level A", key="level_a"):
+            set_level_a()
+    with col_right:
+        if st.button("Level B", key="level_b"):
+            set_level_b()
+        if st.button("Level C", key="level_c"):
+            set_level_c()
 
 # Weighting inputs, arranged in two columns.
 st.sidebar.markdown("### Adjust Weighting Metrics")
