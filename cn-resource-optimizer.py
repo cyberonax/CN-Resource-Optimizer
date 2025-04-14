@@ -83,6 +83,29 @@ def compute_combinations(weights, require_uranium=True):
     df["combo"] = df["combo"].apply(lambda x: ", ".join(x))
     return df.sort_values(by="score", ascending=False)
 
+# --- Optimize Weights Function ---
+def optimize_weights(desired_bonuses):
+    """
+    Compute a suggested weight configuration based on the selected bonus resources.
+    This function starts with a baseline weight of 1.0 for all metrics,
+    then adds the bonus contribution values for each selected bonus.
+    """
+    # Baseline weights
+    new_weights = {
+        "population_bonus": 1.0,
+        "land_bonus": 1.0,
+        "infra_cost_reduction": 1.0,
+        "soldier_efficiency": 1.0,
+        "income_bonus": 1.0,
+        "happiness": 1.0,
+        "tech_cost_reduction": 1.0
+    }
+    for bonus in desired_bonuses:
+        bonus_metrics = bonus_values.get(bonus, {})
+        for key, value in bonus_metrics.items():
+            new_weights[key] += value
+    return new_weights
+
 # --- Initialize Session State for Weight Parameters ---
 if 'population_bonus' not in st.session_state:
     st.session_state.population_bonus = 2.0
@@ -120,55 +143,79 @@ def set_war_mode():
 
 # --- Streamlit UI ---
 st.title("Cyber Nations | Optimal Resource Combination Finder")
-st.markdown("""
-Adjust the metric weights below and click **Calculate** to see optimal 12-resource combinations along with their triggered bonus resources.
-Bonus effects are integrated into the overall score.
-""")
 
-# --- Sidebar Presets ---
-st.sidebar.markdown("### Mode Presets")
-col1, col2 = st.sidebar.columns(2)
-with col1:
-    st.button("Peace Mode", on_click=set_peace_mode)
-with col2:
-    st.button("War Mode", on_click=set_war_mode)
+# Create two tabs: one for computing resource combinations and one for optimizing weight selections
+tabs = st.tabs(["Resource Combinations", "Optimize Weights"])
 
-st.sidebar.markdown("### Adjust Weighting Metrics")
-# The number inputs now use the session state values as their defaults.
-st.sidebar.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
-st.sidebar.number_input("Land Bonus Weight", value=st.session_state.land_bonus, step=0.1, key="land_bonus")
-st.sidebar.number_input("Infra Cost Reduction Weight", value=st.session_state.infra_cost_reduction, step=0.1, key="infra_cost_reduction")
-st.sidebar.number_input("Soldier Efficiency Weight", value=st.session_state.soldier_efficiency, step=0.1, key="soldier_efficiency")
-st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bonus, step=0.1, key="income_bonus")
-st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
-st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
+# --- Tab 1: Resource Combinations ---
+with tabs[0]:
+    st.markdown("""
+    Adjust the metric weights below and click **Calculate** to see optimal 12-resource combinations along with their triggered bonus resources.
+    Bonus effects are integrated into the overall score.
+    """)
+    # --- Sidebar Presets ---
+    st.sidebar.markdown("### Mode Presets")
+    col1, col2 = st.sidebar.columns(2)
+    with col1:
+        st.button("Peace Mode", on_click=set_peace_mode)
+    with col2:
+        st.button("War Mode", on_click=set_war_mode)
+    
+    st.sidebar.markdown("### Adjust Weighting Metrics")
+    # The number inputs now use the session state values as their defaults.
+    st.sidebar.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
+    st.sidebar.number_input("Land Bonus Weight", value=st.session_state.land_bonus, step=0.1, key="land_bonus")
+    st.sidebar.number_input("Infra Cost Reduction Weight", value=st.session_state.infra_cost_reduction, step=0.1, key="infra_cost_reduction")
+    st.sidebar.number_input("Soldier Efficiency Weight", value=st.session_state.soldier_efficiency, step=0.1, key="soldier_efficiency")
+    st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bonus, step=0.1, key="income_bonus")
+    st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
+    st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
+    
+    # --- Add Uranium Toggle ---
+    require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
+    
+    # --- Build Weights Dictionary from Session State ---
+    weights = {
+        "population_bonus": st.session_state.population_bonus,
+        "land_bonus": st.session_state.land_bonus,
+        "infra_cost_reduction": st.session_state.infra_cost_reduction,
+        "soldier_efficiency": st.session_state.soldier_efficiency,
+        "income_bonus": st.session_state.income_bonus,
+        "happiness": st.session_state.happiness,
+        "tech_cost_reduction": st.session_state.tech_cost_reduction
+    }
+    
+    if st.sidebar.button("Calculate"):
+        with st.spinner("Computing combinations..."):
+            df_results = compute_combinations(weights, require_uranium)
+        st.success("Calculation completed!")
+        st.subheader("Top 10 Resource Combinations")
+        st.dataframe(df_results.head(10))
+        def to_excel(df):
+            output = BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            df.to_excel(writer, index=False, sheet_name="Results")
+            writer.close()
+            return output.getvalue()
+        st.download_button("Download Results", data=to_excel(df_results),
+                           file_name="CyberNations_Optimal_Resource_Combinations.xlsx",
+                           mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-# --- Add Uranium Toggle ---
-require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
-
-# --- Build Weights Dictionary from Session State ---
-weights = {
-    "population_bonus": st.session_state.population_bonus,
-    "land_bonus": st.session_state.land_bonus,
-    "infra_cost_reduction": st.session_state.infra_cost_reduction,
-    "soldier_efficiency": st.session_state.soldier_efficiency,
-    "income_bonus": st.session_state.income_bonus,
-    "happiness": st.session_state.happiness,
-    "tech_cost_reduction": st.session_state.tech_cost_reduction
-}
-
-if st.sidebar.button("Calculate"):
-    with st.spinner("Computing combinations..."):
-        df_results = compute_combinations(weights, require_uranium)
-    st.success("Calculation completed!")
-    st.subheader("Top 10 Resource Combinations")
-    st.dataframe(df_results.head(10))
-    def to_excel(df):
-        output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
-        df.to_excel(writer, index=False, sheet_name="Results")
-        writer.close()
-        return output.getvalue()
-    st.download_button("Download Results", data=to_excel(df_results),
-                       file_name="CyberNations_Optimal_Resource_Combinations.xlsx",
-                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+# --- Tab 2: Optimize Weights ---
+with tabs[1]:
+    st.header("Optimize Weight Selections Based on Desired Bonus Resources")
+    st.markdown("Select the bonus resources you want to emphasize. Clicking **Optimize Weights** will suggest a weight configuration based on the bonus contributions defined in the bonus resource benefits.")
+    desired_bonuses = st.multiselect("Select Desired Bonus Resources", list(bonus_values.keys()))
+    if st.button("Optimize Weights", key="optimize_weights"):
+        new_weights = optimize_weights(desired_bonuses)
+        st.write("### Suggested Weight Configuration:")
+        st.write(new_weights)
+        # Optionally update session state so that the Resource Combinations tab reflects these new values.
+        st.session_state.population_bonus = new_weights.get("population_bonus", st.session_state.population_bonus)
+        st.session_state.land_bonus = new_weights.get("land_bonus", st.session_state.land_bonus)
+        st.session_state.infra_cost_reduction = new_weights.get("infra_cost_reduction", st.session_state.infra_cost_reduction)
+        st.session_state.soldier_efficiency = new_weights.get("soldier_efficiency", st.session_state.soldier_efficiency)
+        st.session_state.income_bonus = new_weights.get("income_bonus", st.session_state.income_bonus)
+        st.session_state.happiness = new_weights.get("happiness", st.session_state.happiness)
+        st.session_state.tech_cost_reduction = new_weights.get("tech_cost_reduction", st.session_state.tech_cost_reduction)
+        st.success("Weights have been updated!")
