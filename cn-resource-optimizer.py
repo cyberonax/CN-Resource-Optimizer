@@ -109,23 +109,23 @@ def compute_combinations(weights, require_uranium=True, desired_bonus_filter=Non
 
 # --- Session State Initialization for Weights and Mode ---
 if 'population_bonus' not in st.session_state:
-    st.session_state.population_bonus = 2.0
+    st.session_state.population_bonus = 3.0         # Default — Growth: Strong emphasis on population
 if 'land_bonus' not in st.session_state:
-    st.session_state.land_bonus = 2.0
+    st.session_state.land_bonus = 1.5               # Default — Growth: Moderate value for territorial gain
 if 'infra_cost_reduction' not in st.session_state:
-    st.session_state.infra_cost_reduction = 1.0
+    st.session_state.infra_cost_reduction = 0.5       # Default — Growth: Low priority for cost reduction
 if 'soldier_efficiency' not in st.session_state:
-    st.session_state.soldier_efficiency = 1.0
+    st.session_state.soldier_efficiency = 0.5         # Default — Growth: Minimal military focus
 if 'income_bonus' not in st.session_state:
-    st.session_state.income_bonus = 1.5
+    st.session_state.income_bonus = 2.0             # Default — Growth: Moderate economic support
 if 'happiness' not in st.session_state:
-    st.session_state.happiness = 1.0
+    st.session_state.happiness = 3.0                # Default — Growth: High citizen satisfaction
 if 'tech_cost_reduction' not in st.session_state:
-    st.session_state.tech_cost_reduction = 1.0
+    st.session_state.tech_cost_reduction = 1.0        # Default — Growth: Moderate tech focus
 if 'mode' not in st.session_state:
-    st.session_state.mode = "Peace"
+    st.session_state.mode = "Peace"                 # Default mode: Peace
 if 'nation_level_option' not in st.session_state:
-    st.session_state.nation_level_option = "Default — Growth"
+    st.session_state.nation_level_option = "Default — Growth"  # Default preset text
 
 # --- Define Functions for Preset Configurations ---
 def set_default_mode():
@@ -152,32 +152,36 @@ def set_war_mode():
     st.session_state.tech_cost_reduction = 2.0
     st.session_state.mode = "War"
 
+# New functions for nation-level presets (for Peace Mode only)
 def set_level_a():
-    st.session_state.population_bonus = 2.0
-    st.session_state.land_bonus = 2.0
-    st.session_state.infra_cost_reduction = 1.5
-    st.session_state.soldier_efficiency = 1.0
-    st.session_state.income_bonus = 1.5
-    st.session_state.happiness = 2.0
-    st.session_state.tech_cost_reduction = 3.0
+    # Level A — Tech Seller (<1000 Days Old)
+    st.session_state.population_bonus = 2.0      # Lower emphasis on growth since tech is primary.
+    st.session_state.land_bonus = 2.0              # Slightly higher to secure resources.
+    st.session_state.infra_cost_reduction = 1.5     # Enhanced to support tech infrastructure.
+    st.session_state.soldier_efficiency = 1.0       # Modest increase for baseline security.
+    st.session_state.income_bonus = 1.5            # Slight reduction on income emphasis.
+    st.session_state.happiness = 2.0               # Lower than Default; tech focus takes precedence.
+    st.session_state.tech_cost_reduction = 3.0     # Very high priority to lower tech costs.
 
 def set_level_b():
-    st.session_state.population_bonus = 2.5
-    st.session_state.land_bonus = 2.0
-    st.session_state.infra_cost_reduction = 2.0
-    st.session_state.soldier_efficiency = 1.0
-    st.session_state.income_bonus = 2.0
-    st.session_state.happiness = 1.5
-    st.session_state.tech_cost_reduction = 1.0
+    # Level B — Tech Buyer (1000-2000 Days Old)
+    st.session_state.population_bonus = 2.5      # Balanced growth.
+    st.session_state.land_bonus = 2.0              # Supports resource security.
+    st.session_state.infra_cost_reduction = 2.0     # Increased importance for infrastructure upkeep.
+    st.session_state.soldier_efficiency = 1.0       # Basic security remains.
+    st.session_state.income_bonus = 2.0            # Moderate economic support.
+    st.session_state.happiness = 1.5               # Slightly lower focus on citizen happiness.
+    st.session_state.tech_cost_reduction = 1.0     # Lower priority as they are buying tech.
 
 def set_level_c():
-    st.session_state.population_bonus = 3.0
-    st.session_state.land_bonus = 2.0
-    st.session_state.infra_cost_reduction = 2.5
-    st.session_state.soldier_efficiency = 1.0
-    st.session_state.income_bonus = 1.5
-    st.session_state.happiness = 1.0
-    st.session_state.tech_cost_reduction = 1.0
+    # Level C — Ancient ( >2000 Days Old Tech Buyers)
+    st.session_state.population_bonus = 3.2      # High priority to sustain a large citizen base.
+    st.session_state.land_bonus = 2.0              # Consistent with other presets.
+    st.session_state.infra_cost_reduction = 2.7     # Elevated to reduce costly upkeep.
+    st.session_state.soldier_efficiency = 1.0       # Basic security.
+    st.session_state.income_bonus = 1.5            # Slightly lower, reflecting aged economic structures.
+    st.session_state.happiness = 1.0               # Minimal emphasis on mood improvements.
+    st.session_state.tech_cost_reduction = 0.8     # Minimal emphasis, as tech is less a focus.
 
 # --- Streamlit UI ---
 st.title("Cyber Nations | Optimal Resource Combination Finder")
