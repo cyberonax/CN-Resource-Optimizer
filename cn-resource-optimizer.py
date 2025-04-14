@@ -68,10 +68,8 @@ def evaluate_combination(combo, weights):
     scores = {k: sum(resources[r].get(k, 0) for r in combo) for k in keys}
     base = sum(scores[k] * weights.get(k, 0) for k in keys)
     bonus_list = get_bonus_resources(combo)
-    bonus_score = sum(
-        bonus_values.get(b, {}).get(k, 0) * weights.get(k, 0)
-        for b in bonus_list for k in bonus_values.get(b, {})
-    )
+    bonus_score = sum(bonus_values.get(b, {}).get(k, 0) * weights.get(k, 0)
+                      for b in bonus_list for k in bonus_values.get(b, {}))
     total = base + bonus_score
     return {"combo": combo, **scores, "score": total, "bonus_resources": ", ".join(bonus_list) if bonus_list else ""}
 
@@ -126,8 +124,7 @@ def set_default_mode():
     st.session_state.mode = "Default"
 
 def set_peace_mode():
-    # For Peace Mode, you might use default plus further adjustments via nation level.
-    set_default_mode()
+    set_default_mode()  # Start with default values.
     st.session_state.mode = "Peace"
 
 def set_war_mode():
@@ -173,19 +170,26 @@ st.title("Cyber Nations | Optimal Resource Combination Finder")
 # Sidebar Controls
 st.sidebar.markdown("## Settings")
 
-# Mode Presets
-st.sidebar.markdown("### Mode Presets")
-col1, col2 = st.sidebar.columns(2)
-with col1:
+# Row with Generate, Peace Mode, and War Mode Buttons.
+col_gen, col_peace, col_war = st.sidebar.columns(3)
+with col_gen:
+    generate_pressed = st.button("Calculate")
+with col_peace:
     st.button("Peace Mode", on_click=set_peace_mode)
-with col2:
+with col_war:
     st.button("War Mode", on_click=set_war_mode)
 
-# Custom weighting vs. nation-level presets.
-use_custom = st.sidebar.checkbox("Use Custom Weightings Instead of Nation Level Presets", value=False, key="use_custom")
+# Show the "Use Custom Weightings" checkbox only if not in War mode.
+if st.session_state.mode != "War":
+    use_custom = st.sidebar.checkbox("Use Custom Weightings Instead of Nation Level Presets", value=False, key="use_custom")
+else:
+    use_custom = False
+
 if st.session_state.mode in ["Peace", "Default"] and not use_custom:
     # Radio options include Default, Level A, Level B, and Level C.
-    selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Default", "Level A", "Level B", "Level C"], key="nation_level_option")
+    selected_level = st.sidebar.radio("Nation Level (Peace Mode)",
+                                      ["Default", "Level A", "Level B", "Level C"],
+                                      key="nation_level_option")
     if selected_level == "Default":
         set_default_mode()
     elif selected_level == "Level A":
@@ -195,15 +199,18 @@ if st.session_state.mode in ["Peace", "Default"] and not use_custom:
     elif selected_level == "Level C":
         set_level_c()
 
-# Weighting inputs.
+# Weighting inputs, arranged in two columns.
 st.sidebar.markdown("### Adjust Weighting Metrics")
-st.sidebar.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
-st.sidebar.number_input("Land Bonus Weight", value=st.session_state.land_bonus, step=0.1, key="land_bonus")
-st.sidebar.number_input("Infra Cost Reduction Weight", value=st.session_state.infra_cost_reduction, step=0.1, key="infra_cost_reduction")
-st.sidebar.number_input("Soldier Efficiency Weight", value=st.session_state.soldier_efficiency, step=0.1, key="soldier_efficiency")
-st.sidebar.number_input("Income Bonus Weight", value=st.session_state.income_bonus, step=0.1, key="income_bonus")
-st.sidebar.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
-st.sidebar.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    st.number_input("Population Bonus Weight", value=st.session_state.population_bonus, step=0.1, key="population_bonus")
+    st.number_input("Land Bonus Weight", value=st.session_state.land_bonus, step=0.1, key="land_bonus")
+    st.number_input("Infra Cost Reduction Weight", value=st.session_state.infra_cost_reduction, step=0.1, key="infra_cost_reduction")
+with col2:
+    st.number_input("Soldier Efficiency Weight", value=st.session_state.soldier_efficiency, step=0.1, key="soldier_efficiency")
+    st.number_input("Income Bonus Weight", value=st.session_state.income_bonus, step=0.1, key="income_bonus")
+    st.number_input("Happiness Weight", value=st.session_state.happiness, step=0.1, key="happiness")
+    st.number_input("Tech Cost Reduction Weight", value=st.session_state.tech_cost_reduction, step=0.1, key="tech_cost_reduction")
 
 # Bonus filter selection (default is empty).
 st.sidebar.markdown("### Bonus Filter")
@@ -212,7 +219,7 @@ desired_bonuses = st.sidebar.multiselect("Select Desired Bonus Resources", list(
 # Uranium toggle.
 require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
 
-# Compute Weights Dictionary.
+# Build the weights dictionary from session state.
 weights = {
     "population_bonus": st.session_state.population_bonus,
     "land_bonus": st.session_state.land_bonus,
@@ -223,8 +230,8 @@ weights = {
     "tech_cost_reduction": st.session_state.tech_cost_reduction
 }
 
-# Button to generate and display combinations.
-if st.sidebar.button("Generate Combinations"):
+# If the generate button (in the presets row) is pressed, compute the combinations.
+if generate_pressed:
     with st.spinner("Generating combinations..."):
         df_results = compute_combinations(weights, require_uranium, desired_bonus_filter=desired_bonuses)
     st.success("Combinations generated!")
