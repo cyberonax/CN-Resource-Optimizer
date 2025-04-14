@@ -77,7 +77,7 @@ def evaluate_combination(combo, weights):
 
 @st.cache_data(show_spinner=True)
 def compute_combinations(weights, require_uranium=True, desired_bonus_filter=None):
-    # Generate all 12-resource combinations and filter if Uranium is required
+    # Generate all 12-resource combinations and filter if Uranium is required.
     combos = itertools.combinations(list(resources.keys()), 12)
     if require_uranium:
         combos = (c for c in combos if "Uranium" in c)
@@ -115,7 +115,7 @@ if 'nation_level_option' not in st.session_state:
     st.session_state.nation_level_option = "Default"
 
 # --- Define Functions for Preset Configurations ---
-def set_peace_mode():
+def set_default_mode():
     st.session_state.population_bonus = 3.0
     st.session_state.land_bonus = 1.5
     st.session_state.infra_cost_reduction = 0.5
@@ -123,6 +123,11 @@ def set_peace_mode():
     st.session_state.income_bonus = 2.0
     st.session_state.happiness = 3.0
     st.session_state.tech_cost_reduction = 1.0
+    st.session_state.mode = "Default"
+
+def set_peace_mode():
+    # For Peace Mode, you might use default plus further adjustments via nation level.
+    set_default_mode()
     st.session_state.mode = "Peace"
 
 def set_war_mode():
@@ -176,13 +181,13 @@ with col1:
 with col2:
     st.button("War Mode", on_click=set_war_mode)
 
-# Custom weighting vs nation-level presets.
+# Custom weighting vs. nation-level presets.
 use_custom = st.sidebar.checkbox("Use Custom Weightings Instead of Nation Level Presets", value=False, key="use_custom")
-if st.session_state.mode == "Peace" and not use_custom:
-    # Add a "Default" option that uses the Peace Mode baseline settings.
+if st.session_state.mode in ["Peace", "Default"] and not use_custom:
+    # Radio options include Default, Level A, Level B, and Level C.
     selected_level = st.sidebar.radio("Nation Level (Peace Mode)", ["Default", "Level A", "Level B", "Level C"], key="nation_level_option")
     if selected_level == "Default":
-        set_peace_mode()
+        set_default_mode()
     elif selected_level == "Level A":
         set_level_a()
     elif selected_level == "Level B":
@@ -226,7 +231,7 @@ if st.sidebar.button("Generate Combinations"):
     st.subheader("Top 10 Optimal Resource Combinations")
     st.dataframe(df_results.head(10))
     
-    # Provide an option to download the results.
+    # Option to download the results.
     def to_excel(df):
         output = BytesIO()
         writer = pd.ExcelWriter(output, engine='xlsxwriter')
