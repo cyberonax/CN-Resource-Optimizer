@@ -145,7 +145,7 @@ def set_war_mode():
 st.title("Cyber Nations | Optimal Resource Combination Finder")
 
 # Create two tabs: one for computing resource combinations and one for optimizing weight selections
-tabs = st.tabs(["Resource Combinations", "Optimize Weights"])
+tabs = st.tabs(["Optimize Resource Combinations", "Optimize Weights"])
 
 # --- Tab 1: Resource Combinations ---
 with tabs[0]:
@@ -210,12 +210,6 @@ with tabs[1]:
         new_weights = optimize_weights(desired_bonuses)
         st.write("### Suggested Weight Configuration:")
         st.write(new_weights)
-        # Optionally update session state so that the Resource Combinations tab reflects these new values.
-        st.session_state.population_bonus = new_weights.get("population_bonus", st.session_state.population_bonus)
-        st.session_state.land_bonus = new_weights.get("land_bonus", st.session_state.land_bonus)
-        st.session_state.infra_cost_reduction = new_weights.get("infra_cost_reduction", st.session_state.infra_cost_reduction)
-        st.session_state.soldier_efficiency = new_weights.get("soldier_efficiency", st.session_state.soldier_efficiency)
-        st.session_state.income_bonus = new_weights.get("income_bonus", st.session_state.income_bonus)
-        st.session_state.happiness = new_weights.get("happiness", st.session_state.happiness)
-        st.session_state.tech_cost_reduction = new_weights.get("tech_cost_reduction", st.session_state.tech_cost_reduction)
+        # Update the session state with the new weights using update() to avoid individual assignment issues.
+        st.session_state.update(new_weights)
         st.success("Weights have been updated!")
