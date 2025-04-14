@@ -7,7 +7,26 @@ st.markdown(
     <style>
     [data-testid="stSidebar"] {
         min-width: 300px;
-        max-width: 800px;
+        max-width: 300px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Inject CSS for the custom button row.
+st.markdown(
+    """
+    <style>
+    .button-row {
+        display: flex; 
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    .button-row > div {
+        flex: 1;
+        display: flex;
+        justify-content: center;
     }
     </style>
     """,
@@ -183,23 +202,16 @@ st.title("Cyber Nations | Optimal Resource Combination Finder")
 # Sidebar Controls
 st.sidebar.markdown("## Settings")
 
-# Row with Generate, Peace Mode, and War Mode Buttons.
-col_gen, col_peace, col_war = st.sidebar.columns(3)
-
-with col_gen:
-    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-    generate_pressed = st.button("GO")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with col_peace:
-    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+# Wrap the button row in a div with class "button-row" to apply our CSS.
+st.sidebar.markdown('<div class="button-row">', unsafe_allow_html=True)
+cols = st.sidebar.columns(3)
+with cols[0]:
+    generate_pressed = st.button("Generate")
+with cols[1]:
     st.button("Peace Mode", on_click=set_peace_mode)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with col_war:
-    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+with cols[2]:
     st.button("War Mode", on_click=set_war_mode)
-    st.markdown("</div>", unsafe_allow_html=True)
+st.sidebar.markdown('</div>', unsafe_allow_html=True)
 
 # Show the "Use Custom Weightings" checkbox only if not in War mode.
 if st.session_state.mode != "War":
