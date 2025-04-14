@@ -73,7 +73,7 @@ def evaluate_combination(combo, weights):
     return {"combo": combo, **scores, "score": total, "bonus_resources": ", ".join(bonus_list) if bonus_list else ""}
 
 @st.cache_data(show_spinner=True)
-def compute_combinations(weights, require_uranium=True):
+def compute_combinations(weights, require_uranium=True, desired_bonus_filter=None):
     # Generate all 12-resource combinations and filter if Uranium is required
     combos = itertools.combinations(list(resources.keys()), 12)
     if require_uranium:
@@ -81,6 +81,14 @@ def compute_combinations(weights, require_uranium=True):
     evaluated = [evaluate_combination(c, weights) for c in combos]
     df = pd.DataFrame(evaluated)
     df["combo"] = df["combo"].apply(lambda x: ", ".join(x))
+    # --- Filter by desired bonus resources if provided ---
+    if desired_bonus_filter:
+        def bonus_filter(row):
+            if not row["bonus_resources"]:
+                return False
+            bonus_set = set(map(str.strip, row["bonus_resources"].split(",")))
+            return set(desired_bonus_filter).issubset(bonus_set)
+        df = df[df.apply(bonus_filter, axis=1)]
     return df.sort_values(by="score", ascending=False)
 
 # --- Optimize Weights Function ---
@@ -283,7 +291,7 @@ with tabs[1]:
             }
         require_uranium = st.checkbox("Require Uranium in combinations (for optimized calculation)", value=True, key="opt_generate_uranium")
         with st.spinner("Generating combinations with optimized weights..."):
-            df_results = compute_combinations(weights, require_uranium)
+            df_results = compute_combinations(weights, require_uranium, desired_bonus_filter=desired_bonuses)
         st.success("Optimized combinations generated!")
         st.subheader("Top 10 Optimized Resource Combinations")
         st.dataframe(df_results.head(10))
