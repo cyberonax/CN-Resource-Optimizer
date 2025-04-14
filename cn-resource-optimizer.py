@@ -175,15 +175,19 @@ with tabs[0]:
     require_uranium = st.sidebar.checkbox("Require Uranium in combinations", value=True)
     
     # --- Build Weights Dictionary from Session State ---
-    weights = {
-        "population_bonus": st.session_state.population_bonus,
-        "land_bonus": st.session_state.land_bonus,
-        "infra_cost_reduction": st.session_state.infra_cost_reduction,
-        "soldier_efficiency": st.session_state.soldier_efficiency,
-        "income_bonus": st.session_state.income_bonus,
-        "happiness": st.session_state.happiness,
-        "tech_cost_reduction": st.session_state.tech_cost_reduction
-    }
+    # If an optimized configuration is present, use it; otherwise, use the individual widget values.
+    if "optimized_weights" in st.session_state:
+        weights = st.session_state.optimized_weights
+    else:
+        weights = {
+            "population_bonus": st.session_state.population_bonus,
+            "land_bonus": st.session_state.land_bonus,
+            "infra_cost_reduction": st.session_state.infra_cost_reduction,
+            "soldier_efficiency": st.session_state.soldier_efficiency,
+            "income_bonus": st.session_state.income_bonus,
+            "happiness": st.session_state.happiness,
+            "tech_cost_reduction": st.session_state.tech_cost_reduction
+        }
     
     if st.sidebar.button("Calculate"):
         with st.spinner("Computing combinations..."):
@@ -210,6 +214,6 @@ with tabs[1]:
         new_weights = optimize_weights(desired_bonuses)
         st.write("### Suggested Weight Configuration:")
         st.write(new_weights)
-        # Update the session state with the new weights using update() to avoid individual assignment issues.
-        st.session_state.update(new_weights)
-        st.success("Weights have been updated!")
+        # Instead of updating individual session state keys, store the optimized configuration separately.
+        st.session_state.optimized_weights = new_weights
+        st.success("Optimized weights have been saved!")
